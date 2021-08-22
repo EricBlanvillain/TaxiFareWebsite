@@ -1,46 +1,97 @@
 import streamlit as st
+import requests
+
+
+st.sidebar.markdown(f"""
+    # Documentation:
+    """)
+
+st.sidebar.text("Try this app to predict TaxiFare in NY")
+
+
+
 '''
-# TaxiFareModel front
+# TaxiFareModel:
+## Date & Time:
 '''
 
-st.markdown('''
-Remember that there are several ways to output content into your web page...
+import datetime
 
-Either as with the title by just creating a string (or an f-string). Or as with this paragraph using the `st.` functions
-''')
+d = st.date_input("insert pick up date:",
+                  datetime.date(2019, 7, 6))
+st.write('pick up date is:', d)
+
+t = st.time_input('insert pick up time:',
+                  datetime.time(8, 45))
+st.write('pick up time is:', t)
+
 '''
-## Here we would like to add some controllers in order to ask the user to select the parameters of the ride
-
-1. Let's ask for:
-- date and time
-- pickup longitude
-- pickup latitude
-- dropoff longitude
-- dropoff latitude
-- passenger count
+## Location:
 '''
+
+#$ curl -X POST 'https://places-dsn.algolia.net/1/places/query' \
+#  --data '{"query": "Paris", "type": "city", "countries": ["us", "fr"]}'
+
+def fetch_pickup_location(pickup_location):
+    """
+    Get the location from latitude and longitude
+    """
+    params = {
+        'pickup_location': pickup_location
+    }
+    url = 'https://places-dsn.algolia.net/1/places/query?countries=iso3166-2'
+    response = requests.get(url, params=params).json()
+    pass
+
+
+
+lca = st.text_input('insert your location:')
+st.write('Your location is:', lca)
+
+dst = st.text_input('insert your destination:')
+st.write('Your destination is:', dst)
+
 '''
-## Once we have these, let's call our API in order to retrieve a prediction
+## Passengers:
+'''
+passenger_count = st.number_input('insert number of passengers:',min_value=0, max_value=8)
 
-See ? No need to load a `model.joblib` file in this app, we do not even need to know anything about Data Science in order to retrieve a prediction...
+st.write('The number of passengers is: ', passenger_count)
 
-🤔 How could we call our API ? Off course... The `requests` package 💡
+'''
+#
+#
+#
+#
+#
+'''
+#pickup_datetime=
+#pickup_longitude=
+#pickup_latitude=
+#dropoff_longitude=
+#dropoff_latitude=
+#passenger_count=passenger_count
+
+params = {
+    'pickup_datetime' : pickup_datetime,
+    'pickup_longitude' : pickup_longitude,
+    'pickup_latitude' : pickup_latitude,
+    'dropoff_longitude' : dropoff_longitude,
+    'dropoff_latitude' : dropoff_latitude,
+    'passenger_count' : passenger_count
+}
+
+
+'''
+#
+#
+#
+#
+#
 '''
 
 url = 'https://taxifare.lewagon.ai/predict'
-
-if url == 'https://taxifare.lewagon.ai/predict':
-
-    st.markdown(
-        'Maybe you want to use your own API for the prediction, not the one provided by Le Wagon...'
-    )
-'''
-
-2. Let's build a dictionary containing the parameters for our API...
-
-3. Let's call our API using the `requests` package...
-
-4. Let's retrieve the prediction from the **JSON** returned by the API...
-
-## Finally, we can display the prediction to the user
-'''
+response = requests.get(url, params=params).json()
+prediction = response['prediction']
+if st.button('Get Fare !'):
+    st.write(f'your estimated fare is {round(prediction,2)}')
